@@ -4,7 +4,7 @@ En enkel progressiv webbapp för att söka vetenskapliga publikationer – med A
 
 ## Funktioner
 
-- Sök bland 200+ miljoner publikationer via Semantic Scholars öppna API
+- Sök bland 250+ miljoner publikationer via OpenAlex API (CORS-vänligt och utan nyckel)
 - AI-sammanfattning per publikation (SciTLDR-modellen)
 - Abstrakt, citeringsantal, författare, år och tidskrift
 - Läslista som sparas lokalt i webbläsaren
@@ -26,4 +26,4 @@ Service worker kräver att sidan serveras via http(s), inte file://. Starta en l
 
 ## Teknik
 
-Ren HTML, CSS och JavaScript – inga byggverktyg eller beroenden. Hanterar automatiskt CORS- och hastighetsbegränsningar i Semantic Scholars API med reservvägar, och faller tillbaka på exempeldata om API:et inte kan nås.
+Ren HTML, CSS och JavaScript – inga byggverktyg eller beroenden. Sökdata hämtas från OpenAlex (pålitligt, CORS-aktiverat), och AI-sammanfattningar (TLDR) hämtas i ett enda batch-anrop från Semantic Scholar; om det är hastighetsbegränsat visas abstrakten istället.
