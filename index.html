@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Scholar</title>
+<meta name="description" content="Sök vetenskapliga publikationer med AI-sammanfattningar.">
+<meta name="theme-color" content="#0ea5e9">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: #f1f5f9; color: #0f172a; }
+.container { max-width: 720px; margin: 0 auto; padding: 0 16px; }
+header { background: #fff; border-bottom: 1px solid #e2e8f0; }
+.hrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 0; }
+.brand { display: flex; align-items: center; gap: 10px; }
+.logo { width: 40px; height: 40px; border-radius: 12px; background: #0ea5e9; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+h1 { font-size: 18px; margin: 0; }
+.sub { font-size: 12px; color: #64748b; margin: 2px 0 0; }
+.tabs { display: flex; gap: 6px; }
+.tab { border: 0; border-radius: 999px; padding: 7px 14px; font-size: 12px; font-weight: 600; cursor: pointer; background: #f1f5f9; color: #475569; }
+.tab.active { background: #1e293b; color: #fff; }
+.searchbar { display: flex; gap: 8px; padding-bottom: 16px; }
+.searchbar input { flex: 1; border: 1px solid #e2e8f0; background: #f8fafc; border-radius: 12px; padding: 10px 14px; font-size: 14px; outline: none; }
+.searchbar input:focus { border-color: #38bdf8; background: #fff; box-shadow: 0 0 0 3px #e0f2fe; }
+.btn { border: 0; border-radius: 12px; padding: 10px 16px; font-size: 14px; font-weight: 600; color: #fff; background: #0ea5e9; cursor: pointer; }
+.btn:disabled { opacity: .5; }
+.examples { padding-bottom: 14px; font-size: 12px; color: #94a3b8; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chip { border: 0; border-radius: 999px; background: #f1f5f9; padding: 5px 12px; font-size: 12px; font-weight: 500; color: #475569; cursor: pointer; }
+.chip:hover { background: #e0f2fe; color: #0369a1; }
+.bar { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #64748b; padding-bottom: 12px; }
+.bar select { border: 1px solid #e2e8f0; border-radius: 8px; padding: 4px 6px; font-size: 12px; }
+main { padding: 24px 0 48px; }
+ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.card { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; transition: box-shadow .2s; }
+.card:hover { box-shadow: 0 4px 12px rgba(15,23,42,.08); }
+.cardtop { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+.card h3 { margin: 0; font-size: 15px; line-height: 1.45; }
+.card h3 a { color: #0f172a; text-decoration: none; }
+.card h3 a:hover { color: #0284c7; text-decoration: underline; }
+.meta { margin: 6px 0 0; font-size: 12px; color: #64748b; }
+.badge { display: inline-block; background: #f1f5f9; border-radius: 999px; padding: 2px 8px; font-weight: 600; color: #475569; }
+.tldr { margin-top: 12px; background: #eef2ff; border: 1px solid #e0e7ff; border-radius: 12px; padding: 12px 14px; }
+.tldr .label { font-size: 10px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: #6366f1; margin-bottom: 4px; }
+.tldr p { margin: 0; font-size: 13px; line-height: 1.55; color: #312e81; }
+.abstract { margin-top: 12px; font-size: 13px; line-height: 1.6; color: #475569; cursor: pointer; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.abstract.open { display: block; overflow: visible; }
+.links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #f1f5f9; }
+.links a { font-size: 12px; font-weight: 500; text-decoration: none; border-radius: 8px; padding: 6px 10px; background: #f1f5f9; color: #475569; }
+.links a.pdf { background: #dcfce7; color: #15803d; }
+.save { background: none; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; font-size: 15px; padding: 4px 9px; color: #94a3b8; }
+.save.on { color: #d97706; border-color: #fcd34d; background: #fffbeb; }
+.banner { border-radius: 14px; padding: 14px 18px; font-size: 13px; margin-bottom: 14px; text-align: center; }
+.banner.info { background: #f0f9ff; border: 1px solid #bae6fd; color: #075985; }
+.spinner { width: 32px; height: 32px; border: 3px solid #e0f2fe; border-top-color: #0ea5e9; border-radius: 50%; margin: 60px auto 12px; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading { text-align: center; color: #64748b; font-size: 13px; }
+.empty { text-align: center; color: #94a3b8; font-size: 13px; padding: 56px 0; }
+footer { border-top: 1px solid #e2e8f0; background: #fff; padding: 16px 0; text-align: center; font-size: 11px; color: #94a3b8; }
+</style>
+</head>
+<body>
+<header>
+  <div class="container">
+    <div class="hrow">
+      <div class="brand">
+        <div class="logo">&#127891;</div>
+        <div>
+          <h1>AI Scholar</h1>
+          <p class="sub">Sök publikationer – med AI-sammanfattning</p>
+        </div>
+      </div>
+      <div class="tabs">
+        <button class="tab active" id="tab-search" onclick="switchTab('search')">Sök</button>
+        <button class="tab" id="tab-saved" onclick="switchTab('saved')">Sparade (<span id="savedcount">0</span>)</button>
+      </div>
+    </div>
+    <div class="searchbar">
+      <input id="q" placeholder="Sök efter artiklar, t.ex. transformer attention..." onkeydown="if(event.key==='Enter')doSearch()">
+      <button class="btn" id="searchbtn" onclick="doSearch()">Sök</button>
+    </div>
+    <div class="examples" id="examples">Testa:</div>
+    <div class="bar" id="bar" style="display:none">
+      <span id="count"></span>
+      <label>Sortera:
+        <select id="sort" onchange="render()">
+          <option value="relevance">Relevans</option>
+          <option value="citations">Mest citerade</option>
+        </select>
+      </label>
+    </div>
+  </div>
+</header>
+<main class="container">
+  <div id="notice"></div>
+  <div id="status"></div>
+  <ul id="results"></ul>
+</main>
+<footer>Data och AI-sammanfattningar (TLDR) från Semantic Scholars öppna API. Läslistan sparas lokalt i din webbläsare.</footer>
+<script>
+var API_URL = 'https://api.semanticscholar.org/graph/v1/paper/search';
+var FIELDS = 'title,authors,year,venue,citationCount,abstract,tldr,externalIds,openAccessPdf,url';
+var SAVED_KEY = 'ai-scholar.saved';
+var state = { tab: 'search', results: [], saved: loadSaved(), loading: false, notice: null, viewList: [] };
+
+var DEMO = {
+  crispr: [
+    { paperId: 'demo-c1', title: 'A Programmable Dual-RNA-Guided DNA Endonuclease in Adaptive Bacterial Immunity',
+      authors: [{ name: 'Martin Jinek' }, { name: 'Krzysztof Chylinski' }, { name: 'Ines Fonfara' }, { name: 'Michael Hauer' }, { name: 'Jennifer A. Doudna' }, { name: 'Emmanuelle Charpentier' }],
+      year: 2012, venue: 'Science', citationCount: 14000,
+      abstract: 'Studien visar att Cas9 från Streptococcus pyogenes kan programmeras med en enda konstgjord guide-RNA för att klippa vilken DNA-sekvens som helst - upptäckten som la grunden för CRISPR-genomredigering.',
+      tldr: { text: 'Visar att Cas9 kan styras med en enda guide-RNA för att klippa godtyckliga DNA-sekvenser, vilket gör CRISPR till ett programmerbart verktyg för genomeditering.' },
+      externalIds: { DOI: '10.1126/science.1225829' }, url: 'https://doi.org/10.1126/science.1225829' },
+    { paperId: 'demo-c2', title: 'Multiplex Genome Engineering Using CRISPR/Cas Systems',
+      authors: [{ name: 'Le Cong' }, { name: 'F. Ann Ran' }, { name: 'David Cox' }, { name: 'Shuailiang Lin' }, { name: 'Ruth Barretto' }, { name: 'Naomi Habib' }, { name: 'Patrick D. Hsu' }, { name: 'Wenyan Jiang' }, { name: 'Feng Zhang' }],
+      year: 2013, venue: 'Science', citationCount: 13000,
+      abstract: 'En av de första studierna som visade att CRISPR/Cas9 kan användas för att redigera människocellers genom, och att flera gener kan editeras samtidigt (multiplex).',
+      tldr: { text: 'Demonstrerar CRISPR/Cas9-medierad genomeditering i humana celler med möjlighet att redigera flera loci samtidigt.' },
+      externalIds: { DOI: '10.1126/science.1231143' }, url: 'https://doi.org/10.1126/science.1231143' },
+    { paperId: 'demo-c3', title: 'RNA-Guided Human Genome Engineering via Cas9',
+      authors: [{ name: 'Prashant Mali' }, { name: 'Luhan Yang' }, { name: 'Kevin M. Esvelt' }, { name: 'John Aach' }, { name: 'Marc Guell' }, { name: 'George M. Church' }],
+      year: 2013, venue: 'Science', citationCount: 7500,
+      abstract: 'Studien visar att Cas9 med guide-RNA kan användas för riktade genetiska förändringar i mänskliga celler och beskriver designprinciper för effektiv redigering.',
+      tldr: { text: 'Beskriver hur Cas9 och guide-RNA möjliggör riktade mutationer i den mänskliga genomen, med designregler för hög effektivitet.' },
+      externalIds: { DOI: '10.1126/science.1232033' }, url: 'https://doi.org/10.1126/science.1232033' },
+    { paperId: 'demo-c4', title: 'Repurposing CRISPR as an RNA-Guided Platform for Sequence-Specific Control of Gene Expression',
+      authors: [{ name: 'Lei S. Qi' }, { name: 'Matthew H. Larson' }, { name: 'Luke A. Gilbert' }, { name: 'Jennifer A. Doudna' }, { name: 'Jonathan S. Weissman' }, { name: 'Adam P. Arkin' }, { name: 'Wendell A. Lim' }],
+      year: 2013, venue: 'Cell', citationCount: 3800,
+      abstract: 'Genom att använda en katalytiskt inaktiv Cas9 (dCas9) kan sekvensspecifik genreglering ske utan att klippa DNA - tekniken kom att kallas CRISPRi.',
+      tldr: { text: 'Introducerar dCas9 som ett RNA-stytt verktyg för att tysta eller aktivera specifika gener utan att skada DNA-tråden (CRISPR-interferens).' },
+      externalIds: { DOI: '10.1016/j.cell.2013.02.022' }, url: 'https://doi.org/10.1016/j.cell.2013.02.022' }
+  ],
+  transformer: [
+    { paperId: 'demo-t1', title: 'Attention Is All You Need',
+      authors: [{ name: 'Ashish Vaswani' }, { name: 'Noam Shazeer' }, { name: 'Niki Parmar' }, { name: 'Jakob Uszkoreit' }, { name: 'Llion Jones' }, { name: 'Aidan N. Gomez' }, { name: 'Lukasz Kaiser' }, { name: 'Illia Polosukhin' }],
+      year: 2017, venue: 'NeurIPS', citationCount: 115000,
+      abstract: 'Artikeln introducerar Transformer-arkitekturen, som helt bygger på uppmärksamhetsmekanismer (self-attention) och avstår från rekurrens och konvolution - med bättre resultat och kortare träningstid.',
+      tldr: { text: 'Presenterar Transformer, en nätverksarkitektur enbart baserad på självuppmärksamhet, som blev grunden för moderna språkmodeller.' },
+      externalIds: {}, url: 'https://arxiv.org/abs/1706.03762' },
+    { paperId: 'demo-t2', title: 'BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding',
+      authors: [{ name: 'Jacob Devlin' }, { name: 'Ming-Wei Chang' }, { name: 'Kenton Lee' }, { name: 'Kristina Toutanova' }],
+      year: 2019, venue: 'NAACL', citationCount: 130000,
+      abstract: 'BERT tränas med maskerad språkmodellering på stora textkorpusar och finjusteras sedan för specifika uppgifter, med rekordresultat på elva NLP-benchmark.',
+      tldr: { text: 'Visar att dubbelriktad förträning av Transformers på ostrukturerad text ger toppresultat över många NLP-uppgifter efter bara lätt finjustering.' },
+      externalIds: { DOI: '10.18653/v1/N19-1423' }, url: 'https://doi.org/10.18653/v1/N19-1423' },
+    { paperId: 'demo-t3', title: 'Language Models are Few-Shot Learners',
+      authors: [{ name: 'Tom B. Brown' }, { name: 'Benjamin Mann' }, { name: 'Nick Ryder' }, { name: 'Melanie Subbiah' }, { name: 'Jared Kaplan' }, { name: 'Prafulla Dhariwal' }, { name: 'm.fl. (31 forfattare)' }],
+      year: 2020, venue: 'NeurIPS', citationCount: 45000,
+      abstract: 'GPT-3, en språkmodell med 175 miljarder parametrar, kan lösa nya uppgifter med bara några få exempel i prompten (few-shot learning) utan att vikterna uppdateras.',
+      tldr: { text: 'Visar att en tillräckligt stor språkmodell (GPT-3) kan lösa nya uppgifter från bara några exempel i prompten, utan ytterligare träning.' },
+      externalIds: {}, url: 'https://arxiv.org/abs/2005.14165' },
+    { paperId: 'demo-t4', title: 'RoBERTa: A Robustly Optimized BERT Pretraining Approach',
+      authors: [{ name: 'Yinhan Liu' }, { name: 'Myle Ott' }, { name: 'Naman Goyal' }, { name: 'Jingfei Du' }, { name: 'Mandar Joshi' }, { name: 'Danqi Chen' }, { name: 'Omer Levy' }, { name: 'Mike Lewis' }, { name: 'Luke Zettlemoyer' }, { name: 'Veselin Stoyanov' }],
+      year: 2019, venue: 'arXiv', citationCount: 30000,
+      abstract: 'Genom att träna längre, på mer data och utan next-sentence-prediction förbättrar RoBERTa BERTs resultat på flera benchmarks betydligt.',
+      tldr: { text: 'Visar att BERT var undertränat: enkla ändringar i förträningen ger stora förbättringar och ny toppnivå pa flera benchmark.' },
+      externalIds: {}, url: 'https://arxiv.org/abs/1907.11692' }
+  ]
+};
+
+function $(id) { return document.getElementById(id); }
+function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function loadSaved() { try { var v = JSON.parse(localStorage.getItem(SAVED_KEY)); if (Array.isArray(v)) return v; } catch (e) {} return []; }
+function persist() { try { localStorage.setItem(SAVED_KEY, JSON.stringify(state.saved)); } catch (e) {} }
+function authorsText(p) {
+  var n = (p.authors || []).map(function (a) { return typeof a === 'string' ? a : a.name; });
+  if (!n.length) return 'Okända författare';
+  if (n.length <= 3) return n.join(', ');
+  return n[0] + ', ' + n[1] + ' m.fl. (' + n.length + ' författare)';
+}
+function isSaved(id) { return state.saved.some(function (s) { return s.paperId === id; }); }
+function toggleSave(p) {
+  if (isSaved(p.paperId)) state.saved = state.saved.filter(function (s) { return s.paperId !== p.paperId; });
+  else state.saved.unshift(p);
+  persist(); render();
+}
+function toggleSaveAt(i) { if (state.viewList[i]) toggleSave(state.viewList[i]); }
+function switchTab(t) { state.tab = t; render(); }
+
+function cardHtml(p, i) {
+  var doi = p.externalIds && p.externalIds.DOI;
+  var pdf = p.openAccessPdf && p.openAccessPdf.url;
+  var link = p.url || (doi ? 'https://doi.org/' + doi : '#');
+  var tldr = p.tldr && p.tldr.text;
+  var saved = isSaved(p.paperId);
+  var h = '<li class="card"><div class="cardtop">';
+  h += '<h3><a href="' + esc(link) + '" target="_blank" rel="noreferrer">' + esc(p.title) + '</a></h3>';
+  h += '<button class="save' + (saved ? ' on' : '') + '" onclick="toggleSaveAt(' + i + ')" title="Spara i läslistan">' + (saved ? '&#9733;' : '&#9734;') + '</button></div>';
+  h += '<p class="meta">' + esc(authorsText(p)) + (p.year ? ' &middot; ' + p.year : '') + (p.venue ? ' &middot; ' + esc(p.venue) : '') + ' &middot; <span class="badge">' + (p.citationCount || 0).toLocaleString('sv-SE') + ' citeringar</span></p>';
+  if (tldr) h += '<div class="tldr"><div class="label">&#129302; AI-sammanfattning</div><p>' + esc(tldr) + '</p></div>';
+  if (p.abstract) h += '<p class="abstract" onclick="this.classList.toggle(\'open\')" title="Klicka för att visa hela abstraktet"><b>Abstrakt: </b>' + esc(p.abstract) + '</p>';
+  h += '<div class="links">';
+  if (doi) h += '<a href="https://doi.org/' + esc(doi) + '" target="_blank" rel="noreferrer">DOI &#8599;</a>';
+  if (pdf) h += '<a class="pdf" href="' + esc(pdf) + '" target="_blank" rel="noreferrer">Öppen PDF &#8599;</a>';
+  if (p.url) h += '<a href="' + esc(p.url) + '" target="_blank" rel="noreferrer">Semantic Scholar &#8599;</a>';
+  h += '</div></li>';
+  return h;
+}
+
+function render() {
+  var list = state.tab === 'saved' ? state.saved : state.results;
+  if (state.tab === 'search' && $('sort').value === 'citations') list = list.slice().sort(function (a, b) { return (b.citationCount || 0) - (a.citationCount || 0); });
+  state.viewList = list;
+  $('tab-search').className = 'tab' + (state.tab === 'search' ? ' active' : '');
+  $('tab-saved').className = 'tab' + (state.tab === 'saved' ? ' active' : '');
+  $('savedcount').textContent = state.saved.length;
+  $('notice').innerHTML = state.notice ? '<div class="banner info">' + esc(state.notice) + '</div>' : '';
+  $('bar').style.display = (state.tab === 'search' && state.results.length) ? 'flex' : 'none';
+  $('count').textContent = state.results.length + ' träffar';
+  $('examples').style.display = (state.results.length || state.loading) ? 'none' : 'flex';
+  if (state.loading) {
+    $('status').innerHTML = '<div class="spinner"></div><div class="loading">Söker i Semantic Scholar...</div>';
+    $('results').innerHTML = '';
+    return;
+  }
+  $('status').innerHTML = '';
+  if (!list.length) {
+    $('results').innerHTML = '';
+    $('status').innerHTML = state.tab === 'saved'
+      ? '<div class="empty">Din läslista är tom – spara publikationer med &#9734; i sökresultaten</div>'
+      : '<div class="empty">Sök på något för att börja utforska</div>';
+    return;
+  }
+  var h = '';
+  for (var i = 0; i < list.length; i++) h += cardHtml(list[i], i);
+  $('results').innerHTML = h;
+}
+
+async function doSearch(qVal) {
+  var q = (qVal != null ? qVal : $('q').value).trim();
+  if (!q) return;
+  $('q').value = q;
+  state.tab = 'search';
+  state.loading = true;
+  state.notice = null;
+  $('searchbtn').disabled = true;
+  render();
+  var target = API_URL + '?query=' + encodeURIComponent(q) + '&limit=20&fields=' + FIELDS;
+  var attempts = [target, 'https://corsproxy.io/?url=' + encodeURIComponent(target), 'https://api.allorigins.win/raw?url=' + encodeURIComponent(target)];
+  var data = null, lastErr = null;
+  for (var i = 0; i < attempts.length; i++) {
+    try {
+      var res = await fetch(attempts[i]);
+      if (res.status === 429) { lastErr = 'API:et är upptaget (hastighetsbegränsning) – vänta några sekunder'; continue; }
+      if (!res.ok) { lastErr = 'Sökningen misslyckades (' + res.status + ')'; continue; }
+      data = await res.json();
+      break;
+    } catch (e) { lastErr = (e && e.message) || 'Nätverksfel'; }
+  }
+  state.loading = false;
+  $('searchbtn').disabled = false;
+  if (data) {
+    state.results = data.data || [];
+  } else {
+    var lq = q.toLowerCase();
+    state.results = (lq.indexOf('crispr') >= 0 || lq.indexOf('gene') >= 0) ? DEMO.crispr
+      : (lq.indexOf('transformer') >= 0 || lq.indexOf('attention') >= 0 || lq.indexOf('bert') >= 0 || lq.indexOf('language') >= 0) ? DEMO.transformer
+      : DEMO.crispr.concat(DEMO.transformer);
+    state.notice = 'Kunde inte nå API:et (' + lastErr + '). Visar exempeldata – försök igen om en stund.';
+  }
+  render();
+}
+
+['transformer attention', 'CRISPR gene editing', 'klimatförändringar', 'quantum error correction'].forEach(function (ex) {
+  var b = document.createElement('button');
+  b.className = 'chip';
+  b.textContent = ex;
+  b.onclick = function () { doSearch(ex); };
+  $('examples').appendChild(b);
+});
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js').catch(function () {});
+  });
+}
+render();
+</script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" nonce="gMWJz1+HkqxMpTsxiMDU/A==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "AI Scholar – publikationssök med AI-sammanfattning",
+  "short_name": "AI Scholar",
+  "description": "Sök vetenskapliga publikationer med AI-sammanfattningar.",
+  "lang": "sv",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#0ea5e9",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
