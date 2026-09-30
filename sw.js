@@ -1,4 +1,4 @@
-var CACHE = 'ai-scholar-v1';
+var CACHE = 'ai-scholar-v2';
 var ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', function (e) {
